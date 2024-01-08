@@ -53,7 +53,7 @@ function objectSpawn()
       local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
       local itemPool = models.items.World:getChildren()
       models.itemCopys.World:newPart(world.getTime()):addChild(deepCopy(itemPool[math.random(1,#itemPool)]))
-      models.itemCopys.World[world.getTime()]:setPos(finalFinalPos)
+      models.itemCopys.World[world.getTime()]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
       models.itemCopys.World[world.getTime()]:setRot(0,math.random(0,360),0)
     end
   end
@@ -70,14 +70,10 @@ function events.render(delta)
   local katamariPos = models.prince.root.KatamariPos:partToWorldMatrix():apply()
   lastPos = pos
   pos = katamariPos
-
-  local systmTime = client.getSystemTime()
-   local fdelta = (systmTime-lastFrameTime)/50
    --print(delta)
-    lastFrameTime = systmTime
     local truePos = math.lerp(lastPos,pos,delta)
-    local vel = (lastPos-pos)*8
-    mat:rotate(math.deg(-vel.z)*fdelta,0,math.deg(vel.x)*fdelta)
+    local vel = (lastPos-pos)*2
+    mat:rotate(math.deg(-vel.z)*delta,0,math.deg(vel.x)*delta)
     mat.v14 = truePos.x*16
     mat.v24 = (truePos.y+1)*16
     mat.v34 = truePos.z*16
