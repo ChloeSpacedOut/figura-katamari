@@ -1,4 +1,5 @@
 vanilla_model.PLAYER:setVisible(false)
+models.prince.root.World.Katamari.parts:setPos(0,-16,0)
 
 local density = 300 -- number of items allowed to exist at once
 local spawnRange = 50 -- the diameter from the player items spawn
@@ -80,26 +81,32 @@ end
 
 function events.render(delta)
   local katamariPos = models.prince.root.KatamariPos:partToWorldMatrix():apply()
+  --models.prince.root.World:setPos(katamariPos*16 + vec(0,15,0)) -- TEMP!
   lastPos = pos
   pos = katamariPos
-   --print(delta)
-    local truePos = math.lerp(lastPos,pos,delta)
-    local vel = (lastPos-pos)*2
-    mat:rotate(math.deg(-vel.z)*delta,0,math.deg(vel.x)*delta)
-    mat.v14 = truePos.x*16
-    mat.v24 = (truePos.y+1)*16
-    mat.v34 = truePos.z*16
-    models.prince.root.World:setMatrix(mat)
-
-    for k,item in pairs(models.itemCopys.World:getChildren()) do
-      local pos = item:getPos()/16
-      local horosontalDistance = math.sqrt((katamariPos.x-pos.x)^2 + (katamariPos.z-pos.z)^2)
-      local distance = math.sqrt((horosontalDistance^2 + (katamariPos.y-pos.y)^2))
-      if distance < (15/16) then
-        models.itemCopys.World:removeChild(item)
-      end
-      if distance > (spawnRange) then
-        models.itemCopys.World:removeChild(item)
-      end
+  --print(delta)
+  local truePos = math.lerp(lastPos,pos,delta)
+  local vel = (lastPos-pos)*2
+  mat:rotate(math.deg(-vel.z)*delta,0,math.deg(vel.x)*delta)
+  mat.v14 = truePos.x*16
+  mat.v24 = (truePos.y+1)*16
+  mat.v34 = truePos.z*16
+  models.prince.root.World:setMatrix(mat)
+  
+  for k,item in pairs(models.itemCopys.World:getChildren()) do
+    local pos = item:getPos()/16
+    local horosontalDistance = math.sqrt((katamariPos.x-pos.x)^2 + (katamariPos.z-pos.z)^2)
+    local distance = math.sqrt((horosontalDistance^2 + (katamariPos.y-pos.y)^2))
+    if distance < (18/16) then
+      sounds:playSound("minecraft:block.beehive.drip",player:getPos())
+      local relativePos = katamariPos-pos
+      models.prince.root.World.Katamari.parts:newPart(world.getTime()):addChild(deepCopy(item))
+      models.prince.root.World.Katamari.parts[world.getTime()]:getChildren()[1]:setPos(relativePos*16)
+      models.prince.root.World.Katamari.parts[world.getTime()]:setMatrix(models.prince.root.World:getPositionMatrix():translate(-katamariPos*16))
+      models.itemCopys.World:removeChild(item)
     end
+    if distance > (spawnRange) then
+      models.itemCopys.World:removeChild(item)
+    end
+  end
 end
