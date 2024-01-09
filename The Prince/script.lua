@@ -27,6 +27,11 @@ local function checkCeilng(clientPos)
   return maxCeilingHeight
 end
 
+local function isOnScreen(worldPos)
+  screenPos = vectors.worldToScreenSpace(worldPos)
+  return (-2 < screenPos.x and screenPos.x < 2) and (-2 < screenPos.y and screenPos.y < 2) and screenPos.z > 1
+end
+
 local denyList = {"head","door"}
 
 function objectSpawn()
@@ -49,15 +54,17 @@ function objectSpawn()
     end
     if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
       local finalPos = pos+vec(0.5,0,0.5)
-      local blockHeight = 0
-      if blockstate:getCollisionShape()[1] then
-        blockHeight = blockstate:getCollisionShape()[1][2].y
+      if isOnScreen(finalPos) then
+        local blockHeight = 0
+        if blockstate:getCollisionShape()[1] then
+          blockHeight = blockstate:getCollisionShape()[1][2].y
+        end
+        local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
+        local itemPool = models.items.World:getChildren()
+        models.itemCopys.World:newPart(world.getTime()):addChild(deepCopy(itemPool[math.random(1,#itemPool)]))
+        models.itemCopys.World[world.getTime()]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
+        models.itemCopys.World[world.getTime()]:setRot(0,math.random(0,360),0)
       end
-      local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
-      local itemPool = models.items.World:getChildren()
-      models.itemCopys.World:newPart(world.getTime()):addChild(deepCopy(itemPool[math.random(1,#itemPool)]))
-      models.itemCopys.World[world.getTime()]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
-      models.itemCopys.World[world.getTime()]:setRot(0,math.random(0,360),0)
     end
   end
 end
