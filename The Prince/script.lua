@@ -1,5 +1,5 @@
 vanilla_model.PLAYER:setVisible(false)
-models.prince.root.World.Katamari.parts:setPos(0,-16,0)
+models.models.prince.root.World.Katamari.parts:setPos(0,-16,0)
 
 local density = 300 -- number of items allowed to exist at once
 local spawnRange = 50 -- the diameter from the player items spawn
@@ -61,10 +61,10 @@ function objectSpawn()
           blockHeight = blockstate:getCollisionShape()[1][2].y
         end
         local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
-        local itemPool = models.items.World:getChildren()
-        models.itemCopys.World:newPart(world.getTime()):addChild(deepCopy(itemPool[math.random(1,#itemPool)]))
-        models.itemCopys.World[world.getTime()]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
-        models.itemCopys.World[world.getTime()]:setRot(0,math.random(0,360),0)
+        local itemPool = models.models.items.World:getChildren()
+        models.models.itemCopies.World:newPart(world.getTime()):addChild(deepCopy(itemPool[math.random(1,#itemPool)]))
+        models.models.itemCopies.World[world.getTime()]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
+        models.models.itemCopies.World[world.getTime()]:setRot(0,math.random(0,360),0)
       end
     end
   end
@@ -72,16 +72,16 @@ end
 
 function events.tick()
   for k = 1,10 do
-    if #models.itemCopys.World:getChildren() < density then
+    if #models.models.itemCopies.World:getChildren() < density then
       objectSpawn()
     end
   end
-  models.prince.root.Head.Snorkel:setVisible(player:isUnderwater())
+  models.models.prince.root.Head.Snorkel:setVisible(player:isUnderwater())
 end
 
 function events.render(delta)
-  local katamariPos = models.prince.root.KatamariPos:partToWorldMatrix():apply()
-  --models.prince.root.World:setPos(katamariPos*16 + vec(0,15,0)) -- TEMP!
+  local katamariPos = models.models.prince.root.KatamariPos:partToWorldMatrix():apply()
+  --models.models.prince.root.World:setPos(katamariPos*16 + vec(0,15,0)) -- TEMP!
   lastPos = pos
   pos = katamariPos
   --print(delta)
@@ -91,22 +91,22 @@ function events.render(delta)
   mat.v14 = truePos.x*16
   mat.v24 = (truePos.y+1)*16
   mat.v34 = truePos.z*16
-  models.prince.root.World:setMatrix(mat)
+  models.models.prince.root.World:setMatrix(mat)
   
-  for k,item in pairs(models.itemCopys.World:getChildren()) do
+  for k,item in pairs(models.models.itemCopies.World:getChildren()) do
     local pos = item:getPos()/16
     local horosontalDistance = math.sqrt((katamariPos.x-pos.x)^2 + (katamariPos.z-pos.z)^2)
     local distance = math.sqrt((horosontalDistance^2 + (katamariPos.y-pos.y)^2))
     if distance < (18/16) then
       sounds:playSound("minecraft:block.beehive.drip",player:getPos())
       local relativePos = katamariPos-pos
-      models.prince.root.World.Katamari.parts:newPart(world.getTime()):addChild(deepCopy(item))
-      models.prince.root.World.Katamari.parts[world.getTime()]:getChildren()[1]:setPos(relativePos*16)
-      models.prince.root.World.Katamari.parts[world.getTime()]:setMatrix(models.prince.root.World:getPositionMatrix():translate(-katamariPos*16))
-      models.itemCopys.World:removeChild(item)
+      models.models.prince.root.World.Katamari.parts:newPart(world.getTime()):addChild(deepCopy(item))
+      models.models.prince.root.World.Katamari.parts[world.getTime()]:getChildren()[1]:setPos(relativePos*16)
+      models.models.prince.root.World.Katamari.parts[world.getTime()]:setMatrix(models.models.prince.root.World:getPositionMatrix():translate(-katamariPos*16))
+      models.models.itemCopies.World:removeChild(item)
     end
     if distance > (spawnRange) then
-      models.itemCopys.World:removeChild(item)
+      models.models.itemCopies.World:removeChild(item)
     end
   end
 end
