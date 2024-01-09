@@ -1,5 +1,8 @@
 vanilla_model.PLAYER:setVisible(false)
 
+local density = 300 -- number of items allowed to exist at once
+local spawnRange = 50 -- the diameter from the player items spawn
+
 lastFrameTime = client.getSystemTime()
 lastPos = vec(0,0,0)
 pos = vec(0,0,0)
@@ -29,7 +32,7 @@ local denyList = {"head","door"}
 function objectSpawn()
   local clientPos = client.getViewer():getPos()
   local likleyCeiling = checkCeilng(clientPos)
-  local randomPos = vec(math.floor(clientPos.x) + math.random(-20,20), math.floor(clientPos.y) + likleyCeiling, math.floor(clientPos.z) + math.random(-20,20))
+  local randomPos = vec(math.floor(clientPos.x) + math.random(-spawnRange, spawnRange), math.floor(clientPos.y) + likleyCeiling, math.floor(clientPos.z) + math.random(-spawnRange, spawnRange))
   for k = 0, 5 + likleyCeiling do
     local pos = randomPos - vec(0,k,0)
     local blockstate = world.getBlockState(pos)
@@ -60,8 +63,10 @@ function objectSpawn()
 end
 
 function events.tick()
-  if world.getTime() % 10 == 0 then
-    objectSpawn()
+  for k = 1,10 do
+    if #models.itemCopys.World:getChildren() < density then
+      objectSpawn()
+    end
   end
   models.prince.root.Head.Snorkel:setVisible(player:isUnderwater())
 end
@@ -84,6 +89,9 @@ function events.render(delta)
       local horosontalDistance = math.sqrt((katamariPos.x-pos.x)^2 + (katamariPos.z-pos.z)^2)
       local distance = math.sqrt((horosontalDistance^2 + (katamariPos.y-pos.y)^2))
       if distance < (15/16) then
+        models.itemCopys.World:removeChild(item)
+      end
+      if distance > (spawnRange) then
         models.itemCopys.World:removeChild(item)
       end
     end
