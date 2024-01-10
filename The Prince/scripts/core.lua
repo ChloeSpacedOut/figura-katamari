@@ -1,3 +1,4 @@
+require("scripts.objectList")
 require("scripts.utils")
 require("scripts.objectWorldSpawn")
 require("scripts.rotateBall")
