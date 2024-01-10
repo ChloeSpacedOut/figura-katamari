@@ -103,8 +103,8 @@ function events.render(delta)
   for k,item in pairs(models.models.itemCopies.World:getChildren()) do
     local pos = item:getPos()/16
     local horosontalDistance = math.sqrt((katamariPos.x-pos.x)^2 + (katamariPos.z-pos.z)^2)
-    local distance = math.sqrt((horosontalDistance^2 + (katamariPos.y-pos.y)^2))
-    if distance < (12/16) then
+    local distance = math.sqrt((horosontalDistance^2 + (katamariPos.y-pos.y+1)^2))
+    if distance < (20/16) then
       sounds:playSound("minecraft:block.beehive.drip",player:getPos())
       local relativePos = katamariPos-pos
       relativePos = vec(relativePos.x,-relativePos.y,relativePos.z)
