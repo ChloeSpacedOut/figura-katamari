@@ -38,7 +38,7 @@ objectList = {
   ladybug =          {ID = "ladybug",          length = 3, volume = 11, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
   fly =              {ID = "fly",              length = 5, volume = 20, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
   caterpillar =      {ID = "caterpillar",      length = 8, volume = 9, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
-  dragonFly =        {ID = "dragonfly",        length = 8, volume = 12, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
+  dragonFly =        {ID = "dragonFly",        length = 8, volume = 12, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
   worm =             {ID = "worm",             length = 8, volume = 8, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
   maggot =           {ID = "maggot",           length = 3, volume = 3, rarity = 1, pickupSound = nil, isUnderwaterItem = false},
   spider =           {ID = "spider",           length = 4, volume = 8, rarity = 1, pickupSound = nil, isUnderwaterItem = false},

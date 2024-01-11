@@ -3,8 +3,8 @@ density = 300 -- number of items allowed to exist at once
 spawnRange = 50 -- the diameter from the player items spawn
 local denyList = {"head","door"}
 
-local function checkCeilng(clientPos)
-  local likleyCeiling = 0
+local function checkCeiling(clientPos)
+  local likelyCeiling = 0
   for k = 1, maxCeilingHeight do
     if world.getBlockState(clientPos+vec(0,k,0)):hasCollision() then
       return k
@@ -15,9 +15,9 @@ end
 
 function objectWorldSpawn(spawnID)
   local clientPos = client.getViewer():getPos()
-  local likleyCeiling = checkCeilng(clientPos)
-  local randomPos = vec(math.floor(clientPos.x) + math.random(-spawnRange, spawnRange), math.floor(clientPos.y) + likleyCeiling, math.floor(clientPos.z) + math.random(-spawnRange, spawnRange))
-  for k = 0, 5 + likleyCeiling do
+  local likelyCeiling = checkCeiling(clientPos)
+  local randomPos = vec(math.floor(clientPos.x) + math.random(-spawnRange, spawnRange), math.floor(clientPos.y) + likelyCeiling, math.floor(clientPos.z) + math.random(-spawnRange, spawnRange))
+  for k = 0, 5 + likelyCeiling do
     local pos = randomPos - vec(0,k,0)
     local blockstate = world.getBlockState(pos)
     local aboveBlockstate = world.getBlockState(pos+vec(0,1,0))
