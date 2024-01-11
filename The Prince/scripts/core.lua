@@ -5,7 +5,7 @@ require("scripts.rotateBall")
 require("scripts.addObjects")
 
 vanilla_model.PLAYER:setVisible(false)
-renderer:setCameraPos(0,0,0)
+renderer:setShadowRadius(1/8)
 
 function events.tick()
   for spawnID = 1,10 do
@@ -14,19 +14,47 @@ function events.tick()
     end
   end
   models.models.prince.root.Head.Snorkel:setVisible(player:isUnderwater())
+  if player:getPose() == "CROUCHING" then
+    models.models.prince:setPos(0,5,0)
+    models.models.prince.root.RightLeg:setPos(0,-3,-3)
+    models.models.prince.root.LeftLeg:setPos(0,-3,-3)
+  else
+    models.models.prince:setPos(0,0,0)
+    models.models.prince.root.RightLeg:setPos(0,0,0)
+    models.models.prince.root.LeftLeg:setPos(0,0,0)
+  end
 end
 
+local cameraOffset = 0
 function events.render(delta,context)
   if not (context == "RENDER" or context == "FIRST_PERSON") then return end
-  local katamariPos = (player:getPos(delta) + vec(0,(katamariRadius-18)/16,0) + ((player:getLookDir()*vec(1,0,1)):normalize()*(((katamariRadius+4)/16))))
+  if player:isCrouching() then
+    cameraOffset = math.lerp(cameraOffset,-1/16,0.15)
+  else
+    cameraOffset = math.lerp(cameraOffset,0,0.15)
+  end
+  local katamariPos = (player:getPos(delta) + vec(0,(katamariRadius-17)/16,0) + ((player:getLookDir()*vec(1,0,1)):normalize()*(((katamariRadius)/64) + 0.3)))
   local mat = rotateBall(delta,katamariPos)
   models.models.prince.root.World:setMatrix(mat)
   addObjects(katamariPos,inverseRotMatrix(mat))
   if context == "RENDER" then
-    renderer:setOffsetCameraPivot(0,(katamariRadius-18)/64,0)
-    renderer:setCameraPos(0,0,(katamariRadius-18)/64)
+    models.models.prince.root.LeftArm:setScale(1)
+    models.models.prince.root.RightArm:setScale(1)
+    renderer:setCameraPivot(player:getPos(delta) + vec(0,(katamariRadius-5)/15 + 0.35 + cameraOffset,0))
+    renderer:setCameraPos(0,0,(katamariRadius-5)/16-3)
   else
-    renderer:setOffsetCameraPivot(0,0,0)
+    renderer:setCameraPivot(player:getPos(delta) + vec(0,0.35 + cameraOffset,0))
     renderer:setCameraPos(0,0,0)
+  end
+end
+
+function events.render(delta, context)
+  local isFirstPerson = context == "FIRST_PERSON"
+  if isFirstPerson then
+    models.models.prince.root.RightArm["Right Arm"]:setScale(5)
+    models.models.prince.root.LeftArm["Left Arm"]:setScale(5)
+  else
+    models.models.prince.root.RightArm["Right Arm"]:setScale(1)
+    models.models.prince.root.LeftArm["Left Arm"]:setScale(1)
   end
 end

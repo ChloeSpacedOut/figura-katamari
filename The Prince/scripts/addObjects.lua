@@ -1,5 +1,6 @@
 katamariRadius = 5
-local objectDensityModifier = 3 -- addjust how much the katamari will grow per each new object
+local objectDensityModifier = 3 -- adjusts how much the katamari will grow per each new object
+local pickupTheshold = 1.2 -- adjusts how long the object must be before it can be picked up, where 1 is the radius of the katamari
 
 function addObjects(katamariPos,matInverted)
   for k,item in pairs(models.models.itemCopies.World:getChildren()) do
@@ -7,9 +8,8 @@ function addObjects(katamariPos,matInverted)
     local pos = item:getPos()/16 + item:getChildren()[1]:getPivot()/16
     local horizontalDistance = math.sqrt((katamariPos.x-pos.x)^2 + (katamariPos.z-pos.z)^2)
     local distance = math.sqrt((horizontalDistance^2 + (katamariPos.y-pos.y+1)^2))
-    if distance < (katamariRadius/16) then
+    if distance < (katamariRadius/16) and objectList[itemID].length < katamariRadius * pickupTheshold then
       sounds:playSound("minecraft:block.beehive.drip",player:getPos())
-      local length = objectList[itemID].length
       local addedVolume = objectList[itemID].volume
       local katamariVolume = (4/3)*math.pi*katamariRadius^3
       katamariRadius = ((3/(4*math.pi))*(katamariVolume + addedVolume*objectDensityModifier))^(1/3)
