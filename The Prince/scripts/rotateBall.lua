@@ -7,7 +7,7 @@ function rotateBall(delta,katamariPos)
   pos = katamariPos
   --print(delta)
   local truePos = math.lerp(lastPos,pos,delta)
-  local vel = (lastPos-pos)*2
+  local vel = (lastPos-pos)*(1/(katamariRadius/32))
   mat:rotate(math.deg(-vel.z)*delta,0,math.deg(vel.x)*delta)
   mat.v14 = truePos.x*16
   mat.v24 = (truePos.y+1)*16
