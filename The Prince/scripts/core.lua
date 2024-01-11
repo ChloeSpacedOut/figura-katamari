@@ -41,7 +41,7 @@ function events.render(delta,context)
     models.models.prince.root.LeftArm:setScale(1)
     models.models.prince.root.RightArm:setScale(1)
     renderer:setCameraPivot(player:getPos(delta) + vec(0,(katamariRadius-5)/15 + 0.35 + cameraOffset,0))
-    renderer:setCameraPos(0,0,(katamariRadius-5)/16-3)
+    renderer:setCameraPos(0,0,(katamariRadius-5)/8-3)
   else
     renderer:setCameraPivot(player:getPos(delta) + vec(0,0.35 + cameraOffset,0))
     renderer:setCameraPos(0,0,0)
