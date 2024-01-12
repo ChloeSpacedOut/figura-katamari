@@ -19,3 +19,9 @@ function inverseRotMatrix(mat)
   local column4 = vec(mat.v14,mat.v24,mat.v34,mat.v44)
   return matrices.mat4(column1,column2,column3,column4)
 end
+
+-- from the RNG library by 4p5 (didn't feel like adding the whole library)
+rng = {}
+function rng.float(min, max)
+  return math.random() * (max - min) + min
+end
