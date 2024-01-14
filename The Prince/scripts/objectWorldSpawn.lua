@@ -1,6 +1,27 @@
+require("scripts.objectList")
+require("scripts.utils")
 local maxCeilingHeight = 5 
 density = 300 -- number of items allowed to exist at once
 spawnRange = 50 -- the diameter from the player items spawn
+
+local rarityCount = 0
+local rarityIndex = {}  
+for _,item in pairs(models.models.items.World:getChildren()) do
+  local item = item:getName()
+  rarityCount = rarityCount + objectList[item].rarity
+  table.insert(rarityIndex,{ID = item, rarityVal = rarityCount})
+end
+
+local function getRandomObject()
+  local randVal = rng.float(0,rarityCount)
+  for k,v in ipairs(rarityIndex) do
+    if v.rarityVal > randVal then
+      return v.ID
+    end
+  end
+end
+
+
 local denyList = {"head","door"}
 
 local function checkCeiling(clientPos)
@@ -39,8 +60,7 @@ function objectWorldSpawn(spawnID)
           blockHeight = blockstate:getCollisionShape()[1][2].y
         end
         local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
-        local itemPool = models.models.items.World:getChildren()
-        models.models.itemCopies.World:newPart(world.getTime()*10+spawnID):addChild(deepCopy(itemPool[math.random(1,#itemPool)]))
+        models.models.itemCopies.World:newPart(world.getTime()*10+spawnID):addChild(deepCopy(models.models.items.World[getRandomObject()]))
         models.models.itemCopies.World[world.getTime()*10+spawnID]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
         models.models.itemCopies.World[world.getTime()*10+spawnID]:setRot(0,math.random(0,360),0)
       end
