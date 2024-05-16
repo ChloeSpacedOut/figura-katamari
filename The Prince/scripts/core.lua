@@ -3,6 +3,7 @@ require("scripts.utils")
 require("scripts.objectWorldSpawn")
 require("scripts.rotateBall")
 require("scripts.addObjects")
+require("scripts.cullKatamari")
 
 vanilla_model.PLAYER:setVisible(false)
 renderer:setShadowRadius(1/8)
