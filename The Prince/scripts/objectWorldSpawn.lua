@@ -1,8 +1,8 @@
 require("scripts.objectList")
 require("scripts.utils")
 local maxCeilingHeight = 5 
-density = 300 -- number of items allowed to exist at once
-spawnRange = 50 -- the diameter from the player items spawn
+density = 200 -- number of items allowed to exist at once
+spawnRange = 30 -- the diameter from the player items spawn
 
 local rarityCount = 0
 local rarityIndex = {}  

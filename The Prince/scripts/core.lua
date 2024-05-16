@@ -6,9 +6,10 @@ require("scripts.addObjects")
 
 vanilla_model.PLAYER:setVisible(false)
 renderer:setShadowRadius(1/8)
-
+local mat
+local katamariPos
 function events.tick()
-  for spawnID = 1,10 do
+  for spawnID = 1,5 do
     if #models.models.itemCopies.World:getChildren() < density then
       objectWorldSpawn(spawnID)
     end
@@ -23,6 +24,9 @@ function events.tick()
     models.models.prince.root.RightLeg:setPos(0,0,0)
     models.models.prince.root.LeftLeg:setPos(0,0,0)
   end
+  if mat then
+    addObjects(katamariPos,inverseRotMatrix(mat))
+  end
 end
 
 local cameraOffset = 0
@@ -33,10 +37,9 @@ function events.render(delta,context)
   else
     cameraOffset = math.lerp(cameraOffset,0,0.15)
   end
-  local katamariPos = (player:getPos(delta) + vec(0,(katamariRadius-17)/16,0) + ((player:getLookDir()*vec(1,0,1)):normalize()*(((katamariRadius)/20) + 0.1)))
-  local mat = rotateBall(delta,katamariPos)
+  katamariPos = (player:getPos(delta) + vec(0,(katamariRadius-17)/16,0) + ((player:getLookDir()*vec(1,0,1)):normalize()*(((katamariRadius)/20) + 0.1)))
+  mat = rotateBall(delta,katamariPos)
   models.models.prince.root.World:setMatrix(mat)
-  addObjects(katamariPos,inverseRotMatrix(mat))
   if context == "RENDER" then
     models.models.prince.root.LeftArm:setScale(1)
     models.models.prince.root.RightArm:setScale(1)
