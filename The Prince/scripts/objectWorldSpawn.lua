@@ -25,7 +25,6 @@ end
 local denyList = {"head","door"}
 
 local function checkCeiling(clientPos)
-  local likelyCeiling = 0
   for k = 1, maxCeilingHeight do
     if world.getBlockState(clientPos+vec(0,k,0)):hasCollision() then
       return k

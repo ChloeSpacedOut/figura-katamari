@@ -21,8 +21,8 @@ function addObjects(katamariPos,matInverted)
         local relativePos = (katamariPos/16)-pos
         relativePos = vec(relativePos.x,-relativePos.y,relativePos.z)
         local UUID = tostring(world.getTime()*#models.models.itemCopies.World:getChildren() + k)
-        models.models.prince.root.World.Katamari.parts:newPart(UUID):addChild(deepCopy(item))
-        local katamariPartParent = models.models.prince.root.World.Katamari.parts[UUID]
+        models.models.prince.World.Katamari.parts:newPart(UUID):addChild(deepCopy(item))
+        local katamariPartParent = models.models.prince.World.Katamari.parts[UUID]
         local katamariPart = katamariPartParent:getChildren()[1]
 
         katamariPartParent:setMatrix(katamariPartParent:getPositionMatrix():translate(-katamariPos*16 - vec(0,16,0)):rotateY(180) * matInverted)
