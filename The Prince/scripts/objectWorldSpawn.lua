@@ -24,9 +24,9 @@ end
 
 local denyList = {"head","door"}
 
-local function checkCeiling(clientPos)
+local function checkCeiling(pos)
   for k = 1, maxCeilingHeight do
-    if world.getBlockState(clientPos+vec(0,k,0)):hasCollision() then
+    if world.getBlockState(pos+vec(0,k,0)):hasCollision() then
       return k
     end
   end
@@ -34,9 +34,10 @@ local function checkCeiling(clientPos)
 end
 
 function objectWorldSpawn(spawnID)
-  local clientPos = client.getViewer():getPos()
-  local likelyCeiling = checkCeiling(clientPos)
-  local randomPos = vec(math.floor(clientPos.x) + math.random(-spawnRange, spawnRange), math.floor(clientPos.y) + likelyCeiling, math.floor(clientPos.z) + math.random(-spawnRange, spawnRange))
+  math.randomseed(world.getTime()*spawnID)
+  local pos = player:getPos():floor()
+  local likelyCeiling = checkCeiling(pos)
+  local randomPos = vec(math.floor(pos.x) + math.random(-spawnRange, spawnRange), math.floor(pos.y) + likelyCeiling, math.floor(pos.z) + math.random(-spawnRange, spawnRange))
   for k = 0, 5 + likelyCeiling do
     local pos = randomPos - vec(0,k,0)
     local blockstate = world.getBlockState(pos)
@@ -53,7 +54,7 @@ function objectWorldSpawn(spawnID)
     end
     if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
       local finalPos = pos+vec(0.5,0,0.5)
-      if isOnScreen(finalPos) then
+      if isInLookDir(finalPos) then
         local blockHeight = 0
         if blockstate:getCollisionShape()[1] then
           blockHeight = blockstate:getCollisionShape()[1][2].y

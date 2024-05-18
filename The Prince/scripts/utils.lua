@@ -6,9 +6,11 @@ function deepCopy(model)
   return copy
 end
 
-function isOnScreen(worldPos)
-  screenPos = vectors.worldToScreenSpace(worldPos)
-  return (-2 < screenPos.x and screenPos.x < 2) and (-2 < screenPos.y and screenPos.y < 2) and screenPos.z > 1
+function isInLookDir(worldPos)
+  local vecToPart = worldPos - player:getPos():floor()
+  local lookDir = player:getLookDir():mul(5):floor():mul(0.5)
+  local dot = vecToPart:dot(lookDir)
+  return dot > 0
 end
 
 function inverseRotMatrix(mat)
