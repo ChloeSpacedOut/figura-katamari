@@ -32,8 +32,5 @@ function addObjects(katamariPos,matInverted)
         cullKatamari()
       end
     end
-    if distance and distance > (spawnRange) then
-      models.models.itemCopies.World:removeChild(item)
-    end
   end
 end

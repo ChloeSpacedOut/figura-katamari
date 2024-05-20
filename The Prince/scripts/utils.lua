@@ -6,9 +6,9 @@ function deepCopy(model)
   return copy
 end
 
-function isInLookDir(worldPos)
+function isInLookDir(worldPos,rot)
+  local lookDir = vectors.angleToDir(rot)
   local vecToPart = worldPos - player:getPos():floor()
-  local lookDir = player:getLookDir():mul(5):floor():mul(0.5)
   local dot = vecToPart:dot(lookDir)
   return dot > 0
 end

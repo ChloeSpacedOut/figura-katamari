@@ -33,37 +33,48 @@ local function checkCeiling(pos)
   return maxCeilingHeight
 end
 
-function objectWorldSpawn(spawnID)
-  math.randomseed(world.getTime()*spawnID)
-  local pos = player:getPos():floor()
-  local likelyCeiling = checkCeiling(pos)
-  local randomPos = vec(math.floor(pos.x) + math.random(-spawnRange, spawnRange), math.floor(pos.y) + likelyCeiling, math.floor(pos.z) + math.random(-spawnRange, spawnRange))
-  for k = 0, 5 + likelyCeiling do
-    local pos = randomPos - vec(0,k,0)
-    local blockstate = world.getBlockState(pos)
-    local aboveBlockstate = world.getBlockState(pos+vec(0,1,0))
-    local isDenyListed = false
-    local isDenyListedAbove = false
-    for i,j in pairs(denyList) do
-      if string.find(blockstate.id,j) then
-        isDenyListed = true
-      end
-      if string.find(aboveBlockstate.id,j) then
-        isDenyListedAbove = true
+function pings.objectWorldSpawn(worldTime,pos,rot,objects)
+  for spawnID = 1,20 do
+    if objects < density then
+      math.randomseed(worldTime*spawnID)
+      local likelyCeiling = checkCeiling(pos)
+      local randomPos = vec(math.floor(pos.x) + math.random(-spawnRange, spawnRange), math.floor(pos.y) + likelyCeiling, math.floor(pos.z) + math.random(-spawnRange, spawnRange))
+      for k = 0, 5 + likelyCeiling do
+        local pos = randomPos - vec(0,k,0)
+        local blockstate = world.getBlockState(pos)
+        local aboveBlockstate = world.getBlockState(pos+vec(0,1,0))
+        local isDenyListed = false
+        local isDenyListedAbove = false
+        for i,j in pairs(denyList) do
+          if string.find(blockstate.id,j) then
+            isDenyListed = true
+          end
+          if string.find(aboveBlockstate.id,j) then
+            isDenyListedAbove = true
+          end
+        end
+        if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
+          local finalPos = pos+vec(0.5,0,0.5)
+          if isInLookDir(finalPos,rot) then
+            local blockHeight = 0
+            if blockstate:getCollisionShape()[1] then
+              blockHeight = blockstate:getCollisionShape()[1][2].y
+            end
+            local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
+            local partID = worldTime*spawnID
+            models.models.itemCopies.World:newPart(partID):addChild(deepCopy(models.models.items.World[getRandomObject()]))
+            models.models.itemCopies.World[partID]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
+            models.models.itemCopies.World[partID]:setRot(0,math.random(0,360),0)
+          end
+        end
       end
     end
-    if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
-      local finalPos = pos+vec(0.5,0,0.5)
-      if isInLookDir(finalPos) then
-        local blockHeight = 0
-        if blockstate:getCollisionShape()[1] then
-          blockHeight = blockstate:getCollisionShape()[1][2].y
-        end
-        local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
-        models.models.itemCopies.World:newPart(world.getTime()*10+spawnID):addChild(deepCopy(models.models.items.World[getRandomObject()]))
-        models.models.itemCopies.World[world.getTime()*10+spawnID]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
-        models.models.itemCopies.World[world.getTime()*10+spawnID]:setRot(0,math.random(0,360),0)
-      end
+  end
+  for k,item in pairs(models.models.itemCopies.World:getChildren()) do
+    local objectPos = item:getPos()/16 + item:getChildren()[1]:getPivot()/16
+    local distance = (pos-objectPos):length()
+    if distance > (spawnRange) then
+      models.models.itemCopies.World:removeChild(item)
     end
   end
 end
