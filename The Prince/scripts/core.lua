@@ -74,7 +74,12 @@ function events.post_world_render(delta)
     ballRotMat = rotateBall(delta,katamariPos)
     models.models.prince.World.Katamari:setMatrix(ballRotMat)
     models.models.prince.World.Prince:setPos(player:getPos(delta)*16+vec(0,crouchOffset,0)):setRot(0,-player:getBodyYaw(delta)-180)
-    renderer:setCameraPivot(player:getPos(delta) + vec(0,(katamariRadius-5)/15 + 0.35 + cameraOffset,0))
-    renderer:setCameraPos(0,0,(katamariRadius-5)/8+1)
+
+    local camPos = player:getPos(delta) + vec(0,(katamariRadius-5)/15 + 0.35 + cameraOffset,0)
+    local dir = player:getLookDir()
+    local _, hitPos = raycast:block(camPos,camPos-dir*((katamariRadius-5)/8+1))
+    local distance = (camPos - hitPos):length()
+    renderer:setCameraPivot(camPos)
+    renderer:setCameraPos(0,0,math.max(distance - 0.2,0))
   end
 end
