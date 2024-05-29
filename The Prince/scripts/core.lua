@@ -5,10 +5,12 @@ require("scripts.rotateBall")
 require("scripts.addObjects")
 require("scripts.cullKatamari")
 
-vanilla_model.ALL:setVisible(false)
+vanilla_model.PLAYER:setVisible(false)
+vanilla_model.ELYTRA:setVisible(false)
+vanilla_model.ARMOR:setVisible(false)
+local prince = models.models.prince.Prince
 renderer:setShadowRadius(1/8)
---renderer:crosshairOffset(9999,0)
-models.models.prince.World.Prince.Head:setPrimaryRenderType("TRANSLUCENT_CULL")
+prince.Head:setPrimaryRenderType("TRANSLUCENT_CULL")
 ballRotMat = nil
 isObjectsToggled = false
 isKatamariToggled = false
@@ -16,16 +18,16 @@ local katamariPos
 local lastRunClock = 0
 local runClock = 0
 local perspective = 0
+prince.RightArm.RightItemPivot:setScale(0.25)
+prince.LeftArm.LeftItemPivot:setScale(0.25)
+models.models.prince.World:addChild(deepCopy(models.models.prince.Prince))
+local princeCopy = models.models.prince.World.Prince
 
-local princeCopy = models.models.prince:addChild(deepCopy(models.models.prince.World.Prince))
-princeCopy:setScale(4)
-
-local prince = models.models.prince.World.Prince
 for _,part in pairs({"Head","Body","RightArm","LeftArm","LeftLeg","RightLeg"}) do
-  princeCopy.Prince[part]:setParentType(part)
-  prince[part]:setParentType(nil)
+  princeCopy[part]:setParentType("NONE")
 end
-princeCopy.Prince.LeftArm:setParentType("LeftArm")
+princeCopy.RightArm.RightItemPivot:setParentType("NONE")
+princeCopy.LeftArm.LeftItemPivot:setParentType("NONE")
 
 
 local mainPage = action_wheel:newPage("mainPage")
@@ -64,32 +66,32 @@ function events.tick()
     local objects = #models.models.itemCopies.World:getChildren()
     pings.objectWorldSpawn(world.getTime(),pos,rot,objects)
   end
-  models.models.prince.World.Prince.Head.Snorkel:setVisible(player:isUnderwater())
+  prince.Head.Snorkel:setVisible(player:isUnderwater())
+  princeCopy.Head.Snorkel:setVisible(player:isUnderwater())
   if ballRotMat and isObjectsToggled then
     addObjects(katamariPos,inverseRotMatrix(ballRotMat))
   end
   if player:getGamemode() == "SPECTATOR" then
-    models.models.prince.World.Prince.Head:setOpacity(0.25)
-    models.models.prince.World.Prince.Body:setVisible(false)
-    models.models.prince.World.Prince.LeftArm:setVisible(false)
-    models.models.prince.World.Prince.RightArm:setVisible(false)
-    models.models.prince.World.Prince.LeftLeg:setVisible(false)
-    models.models.prince.World.Prince.RightLeg:setVisible(false)
+    princeCopy.Head:setOpacity(0.25)
+    princeCopy.Body:setVisible(false)
+    princeCopy.LeftArm:setVisible(false)
+    princeCopy.RightArm:setVisible(false)
+    princeCopy.LeftLeg:setVisible(false)
+    princeCopy.RightLeg:setVisible(false)
     models.models.prince.World.Katamari:setVisible(false)
   else
-    models.models.prince.World.Prince.Head:setOpacity(1)
-    models.models.prince.World.Prince.Body:setVisible(true)
-    models.models.prince.World.Prince.LeftArm:setVisible(true)
-    models.models.prince.World.Prince.RightArm:setVisible(true)
-    models.models.prince.World.Prince.LeftLeg:setVisible(true)
-    models.models.prince.World.Prince.RightLeg:setVisible(true)
+    princeCopy.Head:setOpacity(1)
+    princeCopy.Body:setVisible(true)
+    princeCopy.LeftArm:setVisible(true)
+    princeCopy.RightArm:setVisible(true)
+    princeCopy.LeftLeg:setVisible(true)
+    princeCopy.RightLeg:setVisible(true)
     models.models.prince.World.Katamari:setVisible(isKatamariToggled)
   end
 end
 
 local cameraOffset = 0
 local crouchOffset = 0
-renderer:setForcePaperdoll(true)
 
 local togglePerspective = keybinds:fromVanilla("key.togglePerspective")
 function togglePerspective.press()
@@ -98,64 +100,84 @@ function togglePerspective.press()
 end
 
 function events.render(delta,context)
+  local crouchOffset = 0
+  if player:isCrouching() then
+    crouchOffset = 3
+    prince.RightLeg:setPos(0,-3,-2.75)
+    prince.LeftLeg:setPos(0,-3,-2.75)
+    prince.Head:setPos(0,0.5,0)
+    cameraOffset = math.lerp(cameraOffset,-2/16,0.1)
+  else
+    crouchOffset = 0
+    cameraOffset = math.lerp(cameraOffset,0,0.1)
+    prince.RightLeg:setPos(0,0,0)
+    prince.LeftLeg:setPos(0,0,0)
+    prince.Head:setPos(0,0,0)
+  end
+
+  if context == "MINECRAFT_GUI" or context == "FIGURA_GUI" then
+    prince:setPos(0,crouchOffset,0)
+    prince:setScale(4)
+  else
+    prince:setPos(0,-16000 + crouchOffset,0)
+    prince:setScale(1)
+  end
   if not host:isHost() then return end
   if context == "RENDER" then
     log("Please switch to first person and reload avatar.")
     error("womp womp, killing avatar")
   end
+  if isKatamariToggled then
+    prince.LeftArm:setRot(90,0,-15)
+    prince.RightArm:setRot(90,0,15)
+  else
+    prince.LeftArm:setRot(0,0,-15)
+    prince.RightArm:setRot(0,0,15)
+  end
   if context == "FIRST_PERSON" then
     if perspective == 0 then
-      princeCopy.Prince.RightArm["Right Arm"]:setVisible(true):setScale(6):setPos(2,16,2)
+      prince.RightArm["Right Arm"]:setVisible(true):setScale(6):setPos(2,16,2)
     else
-      princeCopy.Prince.RightArm["Right Arm"]:setVisible(false)
+      prince.RightArm["Right Arm"]:setVisible(false)
     end
   else
-    princeCopy.Prince.RightArm["Right Arm"]:setVisible(true):setScale(1):setPos(0,0,0)
+    prince.RightArm["Right Arm"]:setVisible(true):setScale(1):setPos(0,0,0)
   end
 end
 
 function events.post_world_render(delta)
   if player:isLoaded() then
-    local armOffset
-    if isKatamariToggled then
-      armOffset = 90
-    else
-      armOffset = 0
-    end
-    local lerpedRunClock = math.lerp(lastRunClock,runClock,delta)
-    local rot = player:getRot()
-		local yaw = player:getBodyYaw()
-    local vel = player:getVelocity():mul(1,0,1):length()
-    vel = math.clamp(vel,0,0.3)
-    local wave1 = (math.sin(lerpedRunClock*2)*753.6-32.6)*vel
-    local wave2 = (math.sin((lerpedRunClock+math.pi/2)*2)*753.6-32.6)*vel
-    prince.Head:setRot(-player:getRot(delta).x,math.clamp(-((rot.y-yaw + 180) % 360 - 180),-50,50),0)
-    prince.LeftLeg:setRot(wave1*0.25)
-    prince.RightLeg:setRot(wave2*0.25)
-    prince.LeftArm:setRot(wave2*0.25+armOffset,0,-15)
-    prince.RightArm:setRot(wave1*0.25+armOffset,0,15)
-    if player:isCrouching() then
-      crouchOffset = -1
-      prince.Body:setRot(-20)
-      prince.RightLeg:setPos(0,0,0.8)
-      prince.LeftLeg:setPos(0,0,0.8)
-      cameraOffset = math.lerp(cameraOffset,-1/16,0.15)
-    else
-      crouchOffset = 0
-      cameraOffset = math.lerp(cameraOffset,0,0.15)
-      prince.Body:setRot(0)
-      prince.RightLeg:setPos(0,0,0)
-      prince.LeftLeg:setPos(0,0,0)
-    end
     if isKatamariToggled then
       katamariPos = (player:getPos(delta) + vec(0,(katamariRadius-17)/16,0) + ((vectors.angleToDir(player:getRot(delta))*vec(1,0,1)):normalize()*(((katamariRadius)/20) + 0.1)))
       ballRotMat = rotateBall(delta,katamariPos)
       models.models.prince.World.Katamari:setMatrix(ballRotMat)
     end
-    models.models.prince.World.Prince:setPos(player:getPos(delta)*16+vec(0,crouchOffset,0)):setRot(0,-player:getBodyYaw(delta)-180)
+    local headMat = prince.Head:partToWorldMatrix():invert():translate(0,5,0) * models:partToWorldMatrix()
+    princeCopy.Head:setMatrix(headMat:invert():translate(0,16000,0))
+    local bodyMat = prince.Body:partToWorldMatrix():invert():translate(0,5,0) * models:partToWorldMatrix()
+    princeCopy.Body:setMatrix(bodyMat:invert():translate(0,16000,0))
+    local leftArmMat = prince.LeftArm:partToWorldMatrix():invert():translate(-1,4.5,0) * models:partToWorldMatrix()
+    princeCopy.LeftArm:setMatrix(leftArmMat:invert():translate(0,16000,0))
+    local rightArmMat = prince.RightArm:partToWorldMatrix():invert():translate(1,4.5,0) * models:partToWorldMatrix()
+    princeCopy.RightArm:setMatrix(rightArmMat:invert():translate(0,16000,0))
+    local leftLegMat = prince.LeftLeg:partToWorldMatrix():invert():translate(-0.35,2.4,0) * models:partToWorldMatrix()
+    princeCopy.LeftLeg:setMatrix(leftLegMat:invert():translate(0,16000,0))
+    local rightLegMat = prince.RightLeg:partToWorldMatrix():invert():translate(0.45,2.4,0) * models:partToWorldMatrix()
+    princeCopy.RightLeg:setMatrix(rightLegMat:invert():translate(0,16000,0))
+    
+    princeCopy:setPos(player:getPos(delta)*16):setRot(0,-player:getBodyYaw(delta)-180)
+    models.models.prince.World.ImportantCube:setPos(player:getPos(delta)*16 + vec(0,16000,0))
+--[[     local pivotOffset = {0,0}
+    if player:getPose() == "SWIMMING" then
+      pivotOffset = {5,-14}
+    end
+    local princeMat = models:partToWorldMatrix():invert():translate(0,pivotOffset[2],pivotOffset[1]) * models.models.prince.World.ImportantCube:partToWorldMatrix()
+    princeCopy:setMatrix(princeMat:invert():translate(0,16000,0):translate(player:getPos(delta)*16)) ]]
+
     if perspective ~= 0 then
+      vanilla_model.HELD_ITEMS:setVisible(false)
       renderer.renderCrosshair = false
-      prince:setVisible(true)
+      princeCopy:setVisible(true)
       local camPos = player:getPos(delta) + vec(0,(katamariRadius-5)/15 + 0.35 + cameraOffset,0)
       local dir = player:getLookDir()*perspective
       local _, hitPos = raycast:block(camPos,camPos-dir*((katamariRadius-5)/8+1))
@@ -168,8 +190,9 @@ function events.post_world_render(delta)
         renderer:setOffsetCameraRot(0,0,0)
       end
     else
+      vanilla_model.HELD_ITEMS:setVisible(true)
       renderer.renderCrosshair = true
-      prince:setVisible(false)
+      princeCopy:setVisible(false)
       renderer:setOffsetCameraRot(0,0,0)
       renderer:setCameraPos(nil)
       renderer:setCameraPivot(player:getPos(delta)+vec(0,6/16+cameraOffset,0))
