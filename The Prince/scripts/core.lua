@@ -21,14 +21,16 @@ local perspective = 0
 prince.RightArm.RightItemPivot:setScale(0.25)
 prince.LeftArm.LeftItemPivot:setScale(0.25)
 models.models.prince.World:addChild(deepCopy(models.models.prince.Prince))
-local princeCopy = models.models.prince.World.Prince
+local princeCopy
+if host:isHost() then
+  princeCopy = models.models.prince.World.Prince
 
-for _,part in pairs({"Head","Body","RightArm","LeftArm","LeftLeg","RightLeg"}) do
-  princeCopy[part]:setParentType("NONE")
+  for _,part in pairs({"Head","Body","RightArm","LeftArm","LeftLeg","RightLeg"}) do
+    princeCopy[part]:setParentType("NONE")
+  end
+  princeCopy.RightArm.RightItemPivot:setParentType("NONE")
+  princeCopy.LeftArm.LeftItemPivot:setParentType("NONE")
 end
-princeCopy.RightArm.RightItemPivot:setParentType("NONE")
-princeCopy.LeftArm.LeftItemPivot:setParentType("NONE")
-
 
 local mainPage = action_wheel:newPage("mainPage")
 action_wheel:setPage(mainPage)
@@ -58,35 +60,39 @@ local toggleKatamari = mainPage:newAction()
   :setOnToggle(pings.toggleKatamari)
 
 function events.tick()
-  lastRunClock = runClock
-  runClock = runClock + math.clamp(player:getVelocity():mul(1,0,1):length(),0,0.3)
-  if host:isHost() and world.getTime() % 4 == 0 and isObjectsToggled then
-    local pos = (player:getPos()):floor()
-    local rot = (player:getRot())
-    local objects = #models.models.itemCopies.World:getChildren()
-    pings.objectWorldSpawn(world.getTime(),pos,rot,objects)
+  if host:isHost() then
+    princeCopy.RightArm.RightItemPivot:newItem("RightHandItem"):setItem(player:getHeldItem()):setRot(-90,0,180):setDisplayMode("THIRD_PERSON_RIGHT_HAND")
+    princeCopy.LeftArm.LeftItemPivot:newItem("LeftHandItem"):setItem(player:getHeldItem(true)):setRot(-90,0,180):setDisplayMode("THIRD_PERSON_LEFT_HAND")
+    princeCopy.Head.Snorkel:setVisible(player:isUnderwater())
+    if player:getGamemode() == "SPECTATOR" then
+      princeCopy.Head:setOpacity(0.25)
+      princeCopy.Body:setVisible(false)
+      princeCopy.LeftArm:setVisible(false)
+      princeCopy.RightArm:setVisible(false)
+      princeCopy.LeftLeg:setVisible(false)
+      princeCopy.RightLeg:setVisible(false)
+      models.models.prince.World.Katamari:setVisible(false)
+    else
+      princeCopy.Head:setOpacity(1)
+      princeCopy.Body:setVisible(true)
+      princeCopy.LeftArm:setVisible(true)
+      princeCopy.RightArm:setVisible(true)
+      princeCopy.LeftLeg:setVisible(true)
+      princeCopy.RightLeg:setVisible(true)
+      models.models.prince.World.Katamari:setVisible(isKatamariToggled)
+    end
+    if world.getTime() % 4 == 0 and isObjectsToggled then
+      local pos = (player:getPos()):floor()
+      local rot = (player:getRot())
+      local objects = #models.models.itemCopies.World:getChildren()
+      pings.objectWorldSpawn(world.getTime(),pos,rot,objects)
+    end
+  else
+    models.models.prince.World.Katamari:setVisible(isKatamariToggled)
   end
   prince.Head.Snorkel:setVisible(player:isUnderwater())
-  princeCopy.Head.Snorkel:setVisible(player:isUnderwater())
   if ballRotMat and isObjectsToggled then
     addObjects(katamariPos,inverseRotMatrix(ballRotMat))
-  end
-  if player:getGamemode() == "SPECTATOR" then
-    princeCopy.Head:setOpacity(0.25)
-    princeCopy.Body:setVisible(false)
-    princeCopy.LeftArm:setVisible(false)
-    princeCopy.RightArm:setVisible(false)
-    princeCopy.LeftLeg:setVisible(false)
-    princeCopy.RightLeg:setVisible(false)
-    models.models.prince.World.Katamari:setVisible(false)
-  else
-    princeCopy.Head:setOpacity(1)
-    princeCopy.Body:setVisible(true)
-    princeCopy.LeftArm:setVisible(true)
-    princeCopy.RightArm:setVisible(true)
-    princeCopy.LeftLeg:setVisible(true)
-    princeCopy.RightLeg:setVisible(true)
-    models.models.prince.World.Katamari:setVisible(isKatamariToggled)
   end
 end
 
@@ -114,19 +120,6 @@ function events.render(delta,context)
     prince.LeftLeg:setPos(0,0,0)
     prince.Head:setPos(0,0,0)
   end
-
-  if context == "MINECRAFT_GUI" or context == "FIGURA_GUI" then
-    prince:setPos(0,crouchOffset,0)
-    prince:setScale(4)
-  else
-    prince:setPos(0,-16000 + crouchOffset,0)
-    prince:setScale(1)
-  end
-  if not host:isHost() then return end
-  if context == "RENDER" then
-    log("Please switch to first person and reload avatar.")
-    error("womp womp, killing avatar")
-  end
   if isKatamariToggled then
     prince.LeftArm:setRot(90,0,-15)
     prince.RightArm:setRot(90,0,15)
@@ -134,6 +127,26 @@ function events.render(delta,context)
     prince.LeftArm:setRot(0,0,-15)
     prince.RightArm:setRot(0,0,15)
   end
+  if not host:isHost() then
+    if player:isCrouching() then
+      prince:setPos(0,4,0)
+    else
+      prince:setPos(0,0,0)
+    end
+    return
+  end
+  if context == "MINECRAFT_GUI" or context == "FIGURA_GUI" then
+    prince:setPos(0,crouchOffset,0)
+    prince:setScale(4)
+  else
+    prince:setPos(0,-16000 + crouchOffset,0)
+    prince:setScale(1)
+  end
+  if context == "RENDER" then
+    log("Please switch back to first person and reload avatar.")
+    error("womp womp, killing avatar")
+  end
+  
   if context == "FIRST_PERSON" then
     if perspective == 0 then
       prince.RightArm["Right Arm"]:setVisible(true):setScale(6):setPos(2,16,2)
@@ -152,6 +165,7 @@ function events.post_world_render(delta)
       ballRotMat = rotateBall(delta,katamariPos)
       models.models.prince.World.Katamari:setMatrix(ballRotMat)
     end
+    if not host:isHost() then return end
     local headMat = prince.Head:partToWorldMatrix():invert():translate(0,5,0) * models:partToWorldMatrix()
     princeCopy.Head:setMatrix(headMat:invert():translate(0,16000,0))
     local bodyMat = prince.Body:partToWorldMatrix():invert():translate(0,5,0) * models:partToWorldMatrix()
