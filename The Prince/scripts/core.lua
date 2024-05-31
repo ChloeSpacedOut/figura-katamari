@@ -107,8 +107,11 @@ end
 
 function events.render(delta,context)
   local crouchOffset = 0
-  if player:isCrouching() then
-    crouchOffset = 3
+  if player:getPose() == "SWIMMING" or player:getPose() == "FALL_FLYING" then
+    crouchOffset = 0
+    cameraOffset = math.lerp(cameraOffset-(0.3/16),-2/16,0.1)
+  elseif player:isCrouching() then
+    crouchOffset = 4
     prince.RightLeg:setPos(0,-3,-2.75)
     prince.LeftLeg:setPos(0,-3,-2.75)
     prince.Head:setPos(0,0.5,0)
@@ -180,13 +183,12 @@ function events.post_world_render(delta)
     princeCopy.RightLeg:setMatrix(rightLegMat:invert():translate(0,16000,0))
     
     princeCopy:setPos(player:getPos(delta)*16):setRot(0,-player:getBodyYaw(delta)-180)
-    models.models.prince.World.ImportantCube:setPos(player:getPos(delta)*16 + vec(0,16000,0))
---[[     local pivotOffset = {0,0}
+    local pivotOffset = {0,0}
     if player:getPose() == "SWIMMING" then
       pivotOffset = {5,-14}
     end
     local princeMat = models:partToWorldMatrix():invert():translate(0,pivotOffset[2],pivotOffset[1]) * models.models.prince.World.ImportantCube:partToWorldMatrix()
-    princeCopy:setMatrix(princeMat:invert():translate(0,16000,0):translate(player:getPos(delta)*16)) ]]
+    princeCopy:setMatrix(princeMat:invert())
 
     if perspective ~= 0 then
       vanilla_model.HELD_ITEMS:setVisible(false)
