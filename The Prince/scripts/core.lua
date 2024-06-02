@@ -47,6 +47,8 @@ local toggleKatamari = mainPage:newAction()
   :item('slime_ball')
   :setOnToggle(pings.toggleKatamari)
 
+  mainPage:setAction(3, require("scripts/abc_player/abc_player"))
+
 function events.tick()
   if not host:isHost() then
     models.models.prince.World.Katamari:setVisible(isKatamariToggled)
