@@ -10,6 +10,7 @@ require("scripts.cullKatamari")
 prince = models.models.prince.Prince
 isObjectsToggled = false
 isKatamariToggled = false
+isHUDToggled = false
 local ballRotMat
 local katamariPos
 
@@ -65,7 +66,16 @@ mainPage:newAction()
   :item('slime_ball')
   :setOnToggle(pings.toggleKatamari)
 
-mainPage:setAction(3, require("scripts/abc_player/abc_player"))
+function pings.toggleHUD(bool)
+  isHUDToggled = bool
+  models.models.prince.princePreview:setVisible(bool)
+end
+mainPage:newAction()
+  :title("Toggle HUD")
+  :item('painting')
+  :setOnToggle(pings.toggleHUD)
+
+mainPage:setAction(4, require("scripts/abc_player/abc_player"))
 
 -- tick functions
 function events.tick()

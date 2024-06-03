@@ -8,7 +8,7 @@ local pivotOffset = {0,0}
 local cameraOffset = 0
 local crouchOffset = 0
 local isThirdPerson = false
-local importantCube = models.models.prince.World.ImportantCube
+local importantGroup = models.models.prince.World.ImportantGroup
 
 -- avatar setup
 models.models.prince.World:addChild(deepCopy(models.models.prince.Prince))
@@ -138,7 +138,7 @@ function events.post_world_render(delta)
   princeCopy.LeftLeg:setMatrix(leftLegMat:invert():translate(0,16000,0))
   local rightLegMat = prince.RightLeg:partToWorldMatrix():invert():translate(0.45,2.4,0) * models:partToWorldMatrix()
   princeCopy.RightLeg:setMatrix(rightLegMat:invert():translate(0,16000,0))
-  local princeMat = models:partToWorldMatrix():invert():translate(0,pivotOffset[2],pivotOffset[1]) * importantCube:partToWorldMatrix()
+  local princeMat = models:partToWorldMatrix():invert():translate(0,pivotOffset[2],pivotOffset[1]) * importantGroup:partToWorldMatrix()
   princeCopy:setMatrix(princeMat:invert())
 
   -- custom camera & perspective adjustments

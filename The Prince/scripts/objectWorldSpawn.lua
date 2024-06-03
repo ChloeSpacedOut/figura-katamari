@@ -52,7 +52,7 @@ function pings.objectWorldSpawn(worldTime,pos,rot,objects)
       -- cast a ray from the ceiling height to find the ground
       block,objectPos = raycast:block(rayCastPoint,rayCastPoint - vec(0,30,0))
       -- if the object is infront of the player
-      if block:getID() ~= "minecraft:air" and isInLookDir(objectPos,rot) then
+      if block:getID() ~= "minecraft:air" and block:getID() ~= "minecraft:light" and block:getID() ~= "minecraft:cave_air" and isInLookDir(objectPos,rot) then
         -- generates a new part and places it in the world
         local partID = worldTime*spawnID
         models.models.itemCopies.World:newPart(partID):addChild(deepCopy(models.models.items.World[getRandomObject()]))
