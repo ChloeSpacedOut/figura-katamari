@@ -1,17 +1,22 @@
+-- require 
 require("scripts.objectList")
 require("scripts.utils")
-local maxCeilingHeight = 5 
+
+-- define var
 density = 200 -- number of items allowed to exist at once
 spawnRange = 30 -- the diameter from the player items spawn
-
+local maxCeilingHeight = 10
 local rarityCount = 0
-local rarityIndex = {}  
+local rarityIndex = {}
+
+-- generates rarity index table (table to choose objects from)
 for _,item in pairs(models.models.items.World:getChildren()) do
   local item = item:getName()
   rarityCount = rarityCount + objectList[item].rarity
   table.insert(rarityIndex,{ID = item, rarityVal = rarityCount})
 end
 
+-- gets object from rarity index table
 local function getRandomObject()
   local randVal = rng.float(0,rarityCount)
   for k,v in ipairs(rarityIndex) do
@@ -21,56 +26,44 @@ local function getRandomObject()
   end
 end
 
-
-local denyList = {"head","door"}
-
-local function checkCeiling(pos)
-  for k = 1, maxCeilingHeight do
-    if world.getBlockState(pos+vec(0,k,0)):hasCollision() then
-      return k
-    end
-  end
-  return maxCeilingHeight
+-- checks if the a point is infront of the player
+local function isInLookDir(worldPos,rot)
+  local lookDir = vectors.angleToDir(rot)
+  local vecToPart = worldPos - player:getPos():floor()
+  local dot = vecToPart:dot(lookDir)
+  return dot > 0
 end
 
+-- spawns objects in the world
 function pings.objectWorldSpawn(worldTime,pos,rot,objects)
+  -- gets the height of the ceiling above the player
+  local playerPos = player:getPos()
+  _,ceilingPos = raycast:block(playerPos,playerPos+vec(0,maxCeilingHeight,0))
+  local likelyCeiling = ceilingPos.y - player:getPos().y
   for spawnID = 1,20 do
+    -- if object cound isn't greater than the max
     if objects < density then
+      local objectPos = pos
+      -- sets the seed so random values are synced between clients
       math.randomseed(worldTime*spawnID)
-      local likelyCeiling = checkCeiling(pos)
-      local randomPos = vec(math.floor(pos.x) + math.random(-spawnRange, spawnRange), math.floor(pos.y) + likelyCeiling, math.floor(pos.z) + math.random(-spawnRange, spawnRange))
-      for k = 0, 5 + likelyCeiling do
-        local pos = randomPos - vec(0,k,0)
-        local blockstate = world.getBlockState(pos)
-        local aboveBlockstate = world.getBlockState(pos+vec(0,1,0))
-        local isDenyListed = false
-        local isDenyListedAbove = false
-        for i,j in pairs(denyList) do
-          if string.find(blockstate.id,j) then
-            isDenyListed = true
-          end
-          if string.find(aboveBlockstate.id,j) then
-            isDenyListedAbove = true
-          end
-        end
-        if (blockstate:hasCollision() and not (blockstate.id == "minecraft:light" or isDenyListed)) and (not aboveBlockstate:hasCollision() or aboveBlockstate.id == "minecraft:light" or isDenyListedAbove) then
-          local finalPos = pos+vec(0.5,0,0.5)
-          if isInLookDir(finalPos,rot) then
-            local blockHeight = 0
-            if blockstate:getCollisionShape()[1] then
-              blockHeight = blockstate:getCollisionShape()[1][2].y
-            end
-            local finalFinalPos = finalPos*16 + vec(0,blockHeight*16,0)
-            local partID = worldTime*spawnID
-            models.models.itemCopies.World:newPart(partID):addChild(deepCopy(models.models.items.World[getRandomObject()]))
-            models.models.itemCopies.World[partID]:setPos(finalFinalPos + vec(math.random(1,8)+4,0,math.random(1,8)+4))
-            models.models.itemCopies.World[partID]:setRot(0,math.random(0,360),0)
-          end
-        end
+      -- choose a random point around the player
+      local randomPos = vec(math.floor(objectPos.x) + math.random(-spawnRange, spawnRange), math.floor(objectPos.y) + likelyCeiling, math.floor(objectPos.z) + math.random(-spawnRange, spawnRange))
+      local rayCastPoint = randomPos+vec(0.5,0,0.5)
+      -- cast a ray from the ceiling height to find the ground
+      block,objectPos = raycast:block(rayCastPoint,rayCastPoint - vec(0,30,0))
+      -- if the object is infront of the player
+      if block:getID() ~= "minecraft:air" and isInLookDir(objectPos,rot) then
+        -- generates a new part and places it in the world
+        local partID = worldTime*spawnID
+        models.models.itemCopies.World:newPart(partID):addChild(deepCopy(models.models.items.World[getRandomObject()]))
+        models.models.itemCopies.World[partID]:setPos(objectPos*16 + vec(math.random(1,8)+4,0,math.random(1,8)+4))
+        models.models.itemCopies.World[partID]:setRot(0,math.random(0,360),0)
       end
     end
   end
-  for k,item in pairs(models.models.itemCopies.World:getChildren()) do
+
+  -- remove objects too far aay in the world
+  for _,item in pairs(models.models.itemCopies.World:getChildren()) do
     local objectPos = item:getPos()/16 + item:getChildren()[1]:getPivot()/16
     local distance = (pos-objectPos):length()
     if distance > (spawnRange) then

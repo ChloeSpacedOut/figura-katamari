@@ -2,6 +2,7 @@ local lastPos = vec(0,0,0)
 local pos = vec(0,0,0)
 local mat = matrices.mat4()
 
+-- rotate ball function
 function rotateBall(delta,katamariPos)
   lastPos = pos
   pos = katamariPos

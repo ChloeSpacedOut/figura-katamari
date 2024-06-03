@@ -1,3 +1,4 @@
+-- require
 require("scripts.objectList")
 require("scripts.utils")
 require("scripts.objectWorldSpawn")
@@ -5,21 +6,23 @@ require("scripts.rotateBall")
 require("scripts.addObjects")
 require("scripts.cullKatamari")
 
+-- define vars
+prince = models.models.prince.Prince
+isObjectsToggled = false
+isKatamariToggled = false
+local ballRotMat
+local katamariPos
+
+-- avatar setup
 vanilla_model.PLAYER:setVisible(false)
 vanilla_model.ELYTRA:setVisible(false)
 vanilla_model.ARMOR:setVisible(false)
-prince = models.models.prince.Prince
 renderer:setShadowRadius(1/8)
 prince.Head:setPrimaryRenderType("TRANSLUCENT_CULL")
-ballRotMat = nil
-isObjectsToggled = false
-isKatamariToggled = false
-local katamariPos
-perspective = 0
 prince.RightArm.RightItemPivot:setScale(0.25)
 prince.LeftArm.LeftItemPivot:setScale(0.25)
-models.models.prince.World:addChild(deepCopy(models.models.prince.Prince))
-local princeCopy
+
+-- action wheel
 local mainPage = action_wheel:newPage("mainPage")
 action_wheel:setPage(mainPage)
 
@@ -31,8 +34,7 @@ function pings.toggleObjects(bool)
     end
   end
 end
-
-local toggleObjects = mainPage:newAction()
+mainPage:newAction()
   :title("Toggle Objects")
   :item('chest')
   :setOnToggle(pings.toggleObjects)
@@ -40,51 +42,32 @@ local toggleObjects = mainPage:newAction()
 function pings.toggleKatamari(bool)
   isKatamariToggled = bool
   models.models.prince.World.Katamari:setVisible(false)
+  if not bool then
+    for _,part in pairs(models.models.prince.World.Katamari.parts:getChildren()) do
+      models.models.prince.World.Katamari.parts:removeChild(part)
+    end
+    katamariObjects = {}
+    katamariRadius = 5
+  end
 end
-
-local toggleKatamari = mainPage:newAction()
+mainPage:newAction()
   :title("Toggle Katamari")
   :item('slime_ball')
   :setOnToggle(pings.toggleKatamari)
 
-  mainPage:setAction(3, require("scripts/abc_player/abc_player"))
+mainPage:setAction(3, require("scripts/abc_player/abc_player"))
 
+-- tick functions
 function events.tick()
-  if not host:isHost() then
+  -- katamari Visiblity
+  if player:getGamemode() == "SPECTATOR" then
+    models.models.prince.World.Katamari:setVisible(false)
+  else
     models.models.prince.World.Katamari:setVisible(isKatamariToggled)
   end
+  -- snorkel visiblity
   prince.Head.Snorkel:setVisible(player:isUnderwater())
-  if ballRotMat and isObjectsToggled then
-    addObjects(katamariPos,inverseRotMatrix(ballRotMat))
-  end
-end
-
-cameraOffset = 0
-crouchOffset = 0
-
-local togglePerspective = keybinds:fromVanilla("key.togglePerspective")
-function togglePerspective.press()
-  perspective = (perspective + 2) % 3 - 1
-  return true
-end
-
-function events.render(delta,context)
-  if player:getPose() == "SWIMMING" or player:getPose() == "FALL_FLYING" then
-    crouchOffset = 0
-    cameraOffset = math.lerp(cameraOffset-(0.3/16),-2/16,0.1)
-  elseif player:isCrouching() then
-    crouchOffset = 4
-    prince.RightLeg:setPos(0,-3,-2.75)
-    prince.LeftLeg:setPos(0,-3,-2.75)
-    prince.Head:setPos(0,0.5,0)
-    cameraOffset = math.lerp(cameraOffset,-2/16,0.1)
-  else
-    crouchOffset = 0
-    cameraOffset = math.lerp(cameraOffset,0,0.1)
-    prince.RightLeg:setPos(0,0,0)
-    prince.LeftLeg:setPos(0,0,0)
-    prince.Head:setPos(0,0,0)
-  end
+  -- katamri arm rot updates
   if isKatamariToggled then
     prince.LeftArm:setRot(90,0,-15)
     prince.RightArm:setRot(90,0,15)
@@ -92,6 +75,25 @@ function events.render(delta,context)
     prince.LeftArm:setRot(0,0,-15)
     prince.RightArm:setRot(0,0,15)
   end
+  -- katamri object collision check and handler
+  if ballRotMat and isObjectsToggled then
+    addObjects(katamariPos,inverseRotMatrix(ballRotMat))
+  end
+end
+
+-- render functions
+function events.render()
+  -- crouching updates
+  if player:isCrouching() then
+    prince.RightLeg:setPos(0,-3,-2.75)
+    prince.LeftLeg:setPos(0,-3,-2.75)
+    prince.Head:setPos(0,0.5,0)
+  else
+    prince.RightLeg:setPos(0,0,0)
+    prince.LeftLeg:setPos(0,0,0)
+    prince.Head:setPos(0,0,0)
+  end
+  -- not host crouch position update (since it doesn't use the custom player rendering)
   if not host:isHost() then
     if player:isCrouching() then
       prince:setPos(0,4,0)
@@ -100,37 +102,17 @@ function events.render(delta,context)
     end
     return
   end
-  if context == "MINECRAFT_GUI" or context == "FIGURA_GUI" then
-    prince:setPos(0,crouchOffset,0)
-    prince:setScale(4)
-  else
-    prince:setPos(0,-16000 + crouchOffset,0)
-    prince:setScale(1)
-  end
-  if context == "RENDER" then
-    log("Please switch back to first person and reload avatar.")
-    error("womp womp, killing avatar")
-  end
-  
-  if context == "FIRST_PERSON" then
-    if perspective == 0 then
-      prince.RightArm["Right Arm"]:setVisible(true):setScale(6):setPos(2,16,2)
-    else
-      prince.RightArm["Right Arm"]:setVisible(false)
-    end
-  else
-    prince.RightArm["Right Arm"]:setVisible(true):setScale(1):setPos(0,0,0)
-  end
 end
 
+-- update katamari position and roll
 function events.post_world_render(delta)
   if player:isLoaded() then
     if isKatamariToggled then
-      katamariPos = (player:getPos(delta) + vec(0,(katamariRadius-17)/16,0) + ((vectors.angleToDir(player:getRot(delta))*vec(1,0,1)):normalize()*(((katamariRadius)/20) + 0.1)))
+      local heightOffset = vec(0,(katamariRadius-17)/16,0)
+      local yawOffset = ((vectors.angleToDir(player:getRot(delta))*vec(1,0,1)):normalize()*(((katamariRadius)/20) + 0.1))
+      katamariPos = (player:getPos(delta) + heightOffset + yawOffset)
       ballRotMat = rotateBall(delta,katamariPos)
       models.models.prince.World.Katamari:setMatrix(ballRotMat)
     end
-    if not host:isHost() then return end
-    
   end
 end
