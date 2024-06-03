@@ -32,7 +32,6 @@ portrait.Head:setScale(5)
   :setPos(0,-5.8,0)
 portrait.Head.Snorkel:setVisible(false)
 
-
 -- action wheel
 local mainPage = action_wheel:newPage("mainPage")
 action_wheel:setPage(mainPage)
