@@ -21,6 +21,17 @@ renderer:setShadowRadius(1/8)
 prince.Head:setPrimaryRenderType("TRANSLUCENT_CULL")
 prince.RightArm.RightItemPivot:setScale(0.25)
 prince.LeftArm.LeftItemPivot:setScale(0.25)
+local skull = models.models.prince:newPart("Skull","SKULL")
+skull:addChild(deepCopy(prince.Head))
+  :setScale(1)
+  :setPos(0,-4.8,0)
+skull.Head.Snorkel:setVisible(false)
+local portrait = models.models.prince:newPart("Portrait","PORTRAIT")
+portrait:addChild(deepCopy(prince.Head))
+portrait.Head:setScale(5)
+  :setPos(0,-5.8,0)
+portrait.Head.Snorkel:setVisible(false)
+
 
 -- action wheel
 local mainPage = action_wheel:newPage("mainPage")
