@@ -71,8 +71,8 @@ end
 -- render function
 function events.render(delta,context)
   -- first person arm control
-  if context == "FIRST_PERSON" then
-    if perspective == 0 then
+  if context == "FIRST_PERSON"then
+    if perspective == 0  and not isHUDToggled then
       prince.RightArm["Right Arm"]:setVisible(true)
         :setScale(6)
         :setPos(2,16,2)

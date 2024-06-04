@@ -66,14 +66,15 @@ mainPage:newAction()
   :item('slime_ball')
   :setOnToggle(pings.toggleKatamari)
 
-function pings.toggleHUD(bool)
+function toggleHUD(bool)
   isHUDToggled = bool
-  models.models.prince.princePreview:setVisible(bool)
+  models.models.HUD.HUD:setVisible(bool)
+  renderer:setRenderHUD(not bool)
 end
 mainPage:newAction()
   :title("Toggle HUD")
   :item('painting')
-  :setOnToggle(pings.toggleHUD)
+  :setOnToggle(toggleHUD)
 
 mainPage:setAction(4, require("scripts/abc_player/abc_player"))
 
