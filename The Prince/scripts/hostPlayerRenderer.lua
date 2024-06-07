@@ -95,8 +95,10 @@ function events.render(delta,context)
   -- detect real third person
   if context == "RENDER" then
     isThirdPerson = true
+    renderer:setRenderHUD(true)
     host:actionbar([[{"text":"Please switch back to first person! Camera rotation will be broken!","bold":true,"color":"red"}]])
   else
+    renderer:setRenderHUD(not isHUDToggled)
     if isThirdPerson then
       host:actionbar([[{"text":"Thanks <3","bold":true,"color":"green"}]])
     end

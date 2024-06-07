@@ -6,6 +6,8 @@ require("scripts.hostPlayerRenderer")
 -- define vars
 local earth = models.models.HUD.HUD.Earth
 local radiusDisplayPart = models.models.HUD.HUD.RadiusDisplay
+local shape = models.models.HUD.HUD.Shape
+local arrows = models.models.HUD.HUD.KatamriArrows
 -- avatar setup
 models.models.HUD.HUD:setVisible(false)
 models.models.HUD.HUD:newPart("princePreview")
@@ -16,6 +18,8 @@ models.models.HUD.HUD.princePreview:addChild(deepCopy(models.models.prince.Princ
 local princePreview = models.models.HUD.HUD.princePreview.Prince
 local radiusDisplay = radiusDisplayPart:newText("radiusDisplay")
 radiusDisplay:setScale(2)
+shape:setOpacity(0.9)
+arrows:setScale(0.7)
 
 for _,part in pairs({"Head","Body","RightArm","LeftArm","LeftLeg","RightLeg"}) do
   princePreview[part]:setParentType("NONE")
@@ -46,8 +50,10 @@ function events.post_world_render(delta)
   if not player:isLoaded() then return end
   local windowSize = -client.getScaledWindowSize()
   models.models.HUD.HUD.princePreview:setPos(windowSize.x+60,windowSize.y+65,0)
-  earth:setPos(windowSize.x+50,windowSize.y+30,30)
-  radiusDisplayPart:setPos(-30,-30,0)
+  earth:setPos(windowSize.x+64,windowSize.y+34,30)
+  shape:setPos(-34,-26,0)
+    :setScale(math.sin(world.getTime(delta)/2)/40+1.02)
+  radiusDisplayPart:setPos(-70,-60,0)
   -- immatate vanilla part rot and position
   local headMat = prince.Head:partToWorldMatrix():invert():translate(0,5,0) * models:partToWorldMatrix()
   princePreview.Head:setMatrix(headMat:invert():translate(0,16000,0))
