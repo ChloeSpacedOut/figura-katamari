@@ -1,3 +1,5 @@
+-- require
+require("scripts.objectAnimator")
 -- define vars
 katamariRadius = 5
 local objectDensityModifier = 3 -- adjusts how much the katamari will grow per each new object
@@ -16,7 +18,10 @@ function addObjects(katamariPos,matInverted)
       local pos = item:getPos()/16 + item:getChildren()[1]:getPivot()/16
       distance = (katamariPos-(pos - vec(0,1,0))):length()
       -- if object is within the pickup range & small enough to be picked up
-      if distance < (katamariRadius/16) and objectList[itemID].length < katamariRadius * pickupTheshold then
+      local isNotTooBig = objectList[itemID].length < katamariRadius * pickupTheshold
+      local isTouchingObject = distance < (katamariRadius/16)
+      local isCollidingObject  = distance < (katamariRadius/16 + 0.4)
+      if isTouchingObject and isNotTooBig then
         -- execute pickup logic
         sounds:playSound("minecraft:block.beehive.drip",player:getPos())
         local addedVolume = objectList[itemID].volume
@@ -34,6 +39,14 @@ function addObjects(katamariPos,matInverted)
         models.models.itemCopies.World:removeChild(item)
         katamariObjects[UUID] = {distance = distance*16, length = objectList[itemID].length}
         cullKatamari()
+      -- checks if colliding with too big object
+      elseif isCollidingObject and not isNotTooBig then
+        local partID = item:getName()
+        -- adds object to animation database
+        if not hitObjectIndex[partID] then
+          hitObjectIndex[partID] = world.getTime()
+          sounds:playSound("minecraft:block.anvil.hit",player:getPos())
+        end
       end
     end
   end

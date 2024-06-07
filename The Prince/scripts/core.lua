@@ -11,8 +11,8 @@ prince = models.models.prince.Prince
 isObjectsToggled = false
 isKatamariToggled = false
 isHUDToggled = false
+katamariPos = nil
 local ballRotMat
-local katamariPos
 
 -- avatar setup
 vanilla_model.PLAYER:setVisible(false)
@@ -103,7 +103,8 @@ function events.tick()
 end
 
 -- render functions
-function events.render()
+function events.render(delta)
+  objectAnimator(delta)
   -- crouching updates
   if player:isCrouching() then
     prince.RightLeg:setPos(0,-3,-2.75)

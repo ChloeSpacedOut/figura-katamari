@@ -108,7 +108,7 @@ function events.render(delta,context)
     crouchOffset = 0
     cameraOffset = math.lerp(cameraOffset-(0.3/16),-2/16,0.1)
   elseif player:getPose() == "FALL_FLYING" then
-    pivotOffset = {5,-14}
+    pivotOffset = {0,0}
     crouchOffset = 0
     cameraOffset = math.lerp(cameraOffset-(0.3/16),-2/16,0.1)
   elseif player:isCrouching() then
