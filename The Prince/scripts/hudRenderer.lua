@@ -8,6 +8,7 @@ local earth = models.models.HUD.HUD.Earth
 local radiusDisplayPart = models.models.HUD.HUD.RadiusDisplay
 local shape = models.models.HUD.HUD.Shape
 local arrows = models.models.HUD.HUD.KatamriArrows
+local pickupPreview = models.models.HUD.HUD.PickupPreview
 -- avatar setup
 models.models.HUD.HUD:setVisible(false)
 models.models.HUD.HUD:newPart("princePreview")
@@ -19,7 +20,8 @@ local princePreview = models.models.HUD.HUD.princePreview.Prince
 local radiusDisplay = radiusDisplayPart:newText("radiusDisplay")
 radiusDisplay:setScale(2)
 shape:setOpacity(0.9)
-arrows:setScale(0.7)
+arrows:setScale(0.65)
+pickupPreview:setVisible(false)
 
 for _,part in pairs({"Head","Body","RightArm","LeftArm","LeftLeg","RightLeg"}) do
   princePreview[part]:setParentType("NONE")
@@ -54,6 +56,7 @@ function events.post_world_render(delta)
   shape:setPos(-34,-26,0)
     :setScale(math.sin(world.getTime(delta)/2)/40+1.02)
   radiusDisplayPart:setPos(-70,-60,0)
+  pickupPreview:setPos(-80,windowSize.y+65,0)
   -- immatate vanilla part rot and position
   local headMat = prince.Head:partToWorldMatrix():invert():translate(0,5,0) * models:partToWorldMatrix()
   princePreview.Head:setMatrix(headMat:invert():translate(0,16000,0))

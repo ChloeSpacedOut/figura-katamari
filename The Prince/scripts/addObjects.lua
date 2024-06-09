@@ -35,6 +35,21 @@ function addObjects(katamariPos,matInverted)
         local katamariPart = katamariPartParent:getChildren()[1]
         katamariPartParent:setMatrix(katamariPartParent:getPositionMatrix():translate(-katamariPos*16 - vec(0,16,0)):rotateY(180) * matInverted)
         katamariPart:setPos(katamariPart:getPos() -katamariPos*16 - vec(0,16,0))
+        -- 
+        if host:isHost() then
+          local pickupPreview = models.models.HUD.HUD.PickupPreview
+          for _,part in pairs(pickupPreview.Object:getChildren()) do
+            part:remove()
+          end
+          pickupPreview.Object:newPart(UUID):addChild(deepCopy(item))
+          local objectPart = pickupPreview.Object[UUID]:getChildren()[1]
+          pickupPreview.Object[UUID]:setPos(0,-25,0)
+          objectPart:setPos(0,0,0)
+            :setRot(-25,0,0)
+            :setScale(1/objectList[itemID].length*50)
+            animations["models.HUD"].pickupObject:stop()
+            animations["models.HUD"].pickupObject:play()
+        end
         -- remove origional objects and cull objects in the katamari
         models.models.itemCopies.World:removeChild(item)
         katamariObjects[UUID] = {distance = distance*16, length = objectList[itemID].length}
