@@ -35,20 +35,24 @@ function addObjects(katamariPos,matInverted)
         local katamariPart = katamariPartParent:getChildren()[1]
         katamariPartParent:setMatrix(katamariPartParent:getPositionMatrix():translate(-katamariPos*16 - vec(0,16,0)):rotateY(180) * matInverted)
         katamariPart:setPos(katamariPart:getPos() -katamariPos*16 - vec(0,16,0))
-        -- 
+        -- apply pickup indicator animation
         if host:isHost() then
           local pickupPreview = models.models.HUD.HUD.PickupPreview
-          for _,part in pairs(pickupPreview.Object:getChildren()) do
+          for _,part in pairs(pickupPreview.Object.RotateObject:getChildren()) do
             part:remove()
           end
-          pickupPreview.Object:newPart(UUID):addChild(deepCopy(item))
-          local objectPart = pickupPreview.Object[UUID]:getChildren()[1]
-          pickupPreview.Object[UUID]:setPos(0,-25,0)
+          pickupPreview.Object.RotateObject:newPart(UUID):addChild(deepCopy(item))
+          local objectPart = pickupPreview.Object.RotateObject[UUID]:getChildren()[1]
+          pickupPreview.Object.RotateObject[UUID]:setPos(0,-25,0)
+          local previewData = objectList[itemID].previewData
           objectPart:setPos(0,0,0)
-            :setRot(-25,0,0)
-            :setScale(1/objectList[itemID].length*50)
-            animations["models.HUD"].pickupObject:stop()
-            animations["models.HUD"].pickupObject:play()
+            :setRot(0,0,0)
+            :setScale(previewData[2])
+          pickupPreview.Object:setRot(-35,0,0)
+            :setPos(0,previewData[1],0)
+          pickupPreviewName:setText(objectList[itemID].name)
+          animations["models.HUD"].pickupObject:stop()
+          animations["models.HUD"].pickupObject:play()
         end
         -- remove origional objects and cull objects in the katamari
         models.models.itemCopies.World:removeChild(item)
@@ -59,7 +63,9 @@ function addObjects(katamariPos,matInverted)
         local partID = item:getName()
         -- adds object to animation database
         if not hitObjectIndex[partID] then
-          hitObjectIndex[partID] = world.getTime()
+          local partPos = item:partToWorldMatrix():apply()
+          local angle =  math.deg(math.atan2(katamariPos.x - partPos.x,katamariPos.z - partPos.z)) - 180
+          hitObjectIndex[partID] = {collisionTime = world.getTime(), collisionAngle = angle}
           sounds:playSound("minecraft:block.anvil.hit",player:getPos())
         end
       end
