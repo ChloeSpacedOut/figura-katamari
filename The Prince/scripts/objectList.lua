@@ -44,4 +44,6 @@ objectList = {
   spider =           {name = "Spider",            length = 4, volume = 8, rarity = 1, pickupSound = nil, previewData = {15,13}},
   snail =            {name = "Snail",             length = 4, volume = 8, rarity = 1, pickupSound = nil, previewData = {6,15}},
   slug =             {name = "Slug",              length = 4, volume = 4, rarity = 1, pickupSound = nil, previewData = {10,17}},
+  trafficCone =      {name = "Traffic Cone",      length = 12, volume = 288, rarity = 1, pickupSound = nil, previewData = {0,3}},
+  car =      {name = "Car",      length = 63, volume = 53000, rarity = 0.5, pickupSound = nil, previewData = {5,1.2}}
 }

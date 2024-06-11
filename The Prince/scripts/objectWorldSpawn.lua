@@ -4,7 +4,7 @@ require("scripts.utils")
 
 -- define var
 density = 200 -- number of items allowed to exist at once
-spawnRange = 30 -- the diameter from the player items spawn
+spawnRange = 50 -- the diameter from the player items spawn
 local maxCeilingHeight = 10
 local rarityCount = 0
 local rarityIndex = {}
