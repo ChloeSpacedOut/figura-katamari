@@ -23,7 +23,7 @@ function addObjects(katamariPos,matInverted)
       local isCollidingObject  = distance < (katamariRadius/16 + 0.4)
       if isTouchingObject and isNotTooBig then
         -- execute pickup logic
-        sounds:playSound("minecraft:block.beehive.drip",player:getPos())
+        sounds:playSound("sounds.pickup"..math.random(1,3),player:getPos())
         local addedVolume = objectList[itemID].volume
         local katamariVolume = (4/3)*math.pi*katamariRadius^3
         katamariRadius = ((3/(4*math.pi))*(katamariVolume + addedVolume*objectDensityModifier))^(1/3)
@@ -66,7 +66,7 @@ function addObjects(katamariPos,matInverted)
           local partPos = item:partToWorldMatrix():apply()
           local angle =  math.deg(math.atan2(katamariPos.x - partPos.x,katamariPos.z - partPos.z)) - 180
           hitObjectIndex[partID] = {collisionTime = world.getTime(), collisionAngle = angle}
-          sounds:playSound("minecraft:block.anvil.hit",player:getPos())
+          sounds:playSound("sounds.crash",player:getPos())
         end
       end
     end
